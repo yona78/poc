@@ -21,3 +21,13 @@ The messaging and storage layers are accessed through abstract interfaces, allow
    ```
 
 The application will automatically start a background consumer for the `video_metadata` queue and index incoming messages into Elasticsearch.
+
+## Development tools
+
+To publish random video metadata messages for testing, run:
+
+```bash
+python tools/generate_mocks.py --count 5
+```
+
+This script creates valid `VideoMetadataDTO` payloads and sends them to the configured RabbitMQ queue.
