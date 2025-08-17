@@ -1,50 +1,76 @@
-from typing import List
+"""FastAPI application for video metadata management."""
 
-from fastapi import FastAPI, HTTPException
+from typing import Dict, List
 
-from libs.messaging.rabbitmq import start_consuming
-from libs.models.video_metadata import VideoMetadata
-from libs.storage import elasticsearch as storage
+from fastapi import Depends, FastAPI, HTTPException
+
+from libs.messaging.base import MessageBroker
+from libs.messaging.rabbitmq import RabbitMQBroker
+from libs.models.video_metadata import (
+    VideoMetadata,
+    VideoMetadataDTO,
+    VideoMetadataUpdateDTO,
+)
+from libs.storage.base import Storage
+from libs.storage.elasticsearch import ElasticsearchStorage
 
 app = FastAPI(title="Video Metadata Service")
+
+storage_backend: Storage[VideoMetadata] = ElasticsearchStorage()
+message_broker: MessageBroker[VideoMetadataDTO] = RabbitMQBroker(VideoMetadataDTO)
+
+
+def get_storage() -> Storage[VideoMetadata]:
+    return storage_backend
 
 
 @app.on_event("startup")
 def startup_event() -> None:
-    start_consuming(process_message)
+    message_broker.start_consuming(process_message)
 
 
-def process_message(data):
-    metadata = VideoMetadata(**data)
-    storage.index_video(metadata)
+def process_message(dto: VideoMetadataDTO) -> None:
+    storage_backend.create(dto.to_domain())
 
 
-@app.post("/videos", response_model=VideoMetadata)
-def create_video(metadata: VideoMetadata) -> VideoMetadata:
-    storage.index_video(metadata)
+@app.post("/videos", response_model=VideoMetadataDTO)
+def create_video(
+    metadata: VideoMetadataDTO, storage: Storage[VideoMetadata] = Depends(get_storage)
+) -> VideoMetadataDTO:
+    storage.create(metadata.to_domain())
     return metadata
 
 
-@app.get("/videos/{video_id}", response_model=VideoMetadata)
-def read_video(video_id: str) -> VideoMetadata:
-    data = storage.get_video(video_id)
+@app.get("/videos/{video_id}", response_model=VideoMetadataDTO)
+def read_video(
+    video_id: str, storage: Storage[VideoMetadata] = Depends(get_storage)
+) -> VideoMetadataDTO:
+    data = storage.get(video_id)
     if not data:
         raise HTTPException(status_code=404, detail="Video metadata not found")
-    return data
+    return VideoMetadataDTO.from_domain(data)
 
 
-@app.get("/videos", response_model=List[VideoMetadata])
-def list_videos() -> List[VideoMetadata]:
-    return storage.list_videos()
+@app.get("/videos", response_model=List[VideoMetadataDTO])
+def list_videos(storage: Storage[VideoMetadata] = Depends(get_storage)) -> List[VideoMetadataDTO]:
+    return [VideoMetadataDTO.from_domain(v) for v in storage.list()]
 
 
-@app.put("/videos/{video_id}", response_model=VideoMetadata)
-def update_video(video_id: str, metadata: VideoMetadata) -> VideoMetadata:
-    storage.update_video(video_id, metadata)
-    return metadata
+@app.put("/videos/{video_id}", response_model=VideoMetadataDTO)
+def update_video(
+    video_id: str,
+    updates: VideoMetadataUpdateDTO,
+    storage: Storage[VideoMetadata] = Depends(get_storage),
+) -> VideoMetadataDTO:
+    existing = storage.get(video_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Video metadata not found")
+    updated = updates.apply(existing)
+    storage.update(video_id, updated)
+    return VideoMetadataDTO.from_domain(updated)
 
 
 @app.delete("/videos/{video_id}")
-def delete_video(video_id: str) -> dict:
-    storage.delete_video(video_id)
+def delete_video(video_id: str, storage: Storage[VideoMetadata] = Depends(get_storage)) -> Dict[str, str]:
+    storage.delete(video_id)
     return {"status": "deleted"}

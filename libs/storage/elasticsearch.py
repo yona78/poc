@@ -3,41 +3,43 @@ from typing import List, Optional
 
 from elasticsearch import Elasticsearch
 
-from libs.models.video_metadata import VideoMetadata
-
-ES_HOST = os.getenv("ES_HOST", "http://localhost:9200")
-INDEX_NAME = os.getenv("ES_VIDEO_INDEX", "videos")
-
-_client = Elasticsearch(ES_HOST)
+from libs.models.video_metadata import VideoMetadata, VideoMetadataDTO
+from .base import Storage
 
 
-def index_video(metadata: VideoMetadata) -> None:
-    _client.index(index=INDEX_NAME, id=metadata.video_id, document=metadata.dict())
+class ElasticsearchStorage(Storage[VideoMetadata]):
+    """Elasticsearch-backed storage implementation."""
 
+    def __init__(self, host: Optional[str] = None, index: Optional[str] = None) -> None:
+        self.host = host or os.getenv("ES_HOST", "http://localhost:9200")
+        self.index = index or os.getenv("ES_VIDEO_INDEX", "videos")
+        self.client = Elasticsearch(self.host)
 
-def get_video(video_id: str) -> Optional[VideoMetadata]:
-    try:
-        res = _client.get(index=INDEX_NAME, id=video_id)
-    except Exception:
-        return None
-    source = res.get("_source")
-    if not source:
-        return None
-    return VideoMetadata(**source)
+    def create(self, metadata: VideoMetadata) -> None:
+        dto = VideoMetadataDTO.from_domain(metadata)
+        self.client.index(index=self.index, id=metadata.video_id, document=dto.dict())
 
+    def get(self, video_id: str) -> Optional[VideoMetadata]:
+        try:
+            res = self.client.get(index=self.index, id=video_id)
+        except Exception:
+            return None
+        source = res.get("_source")
+        if not source:
+            return None
+        return VideoMetadataDTO(**source).to_domain()
 
-def list_videos() -> List[VideoMetadata]:
-    res = _client.search(index=INDEX_NAME, body={"query": {"match_all": {}}})
-    hits = res.get("hits", {}).get("hits", [])
-    return [VideoMetadata(**hit["_source"]) for hit in hits]
+    def list(self) -> List[VideoMetadata]:
+        res = self.client.search(index=self.index, body={"query": {"match_all": {}}})
+        hits = res.get("hits", {}).get("hits", [])
+        return [VideoMetadataDTO(**hit["_source"]).to_domain() for hit in hits]
 
+    def update(self, video_id: str, metadata: VideoMetadata) -> None:
+        dto = VideoMetadataDTO.from_domain(metadata)
+        self.client.index(index=self.index, id=video_id, document=dto.dict())
 
-def update_video(video_id: str, metadata: VideoMetadata) -> None:
-    _client.index(index=INDEX_NAME, id=video_id, document=metadata.dict())
-
-
-def delete_video(video_id: str) -> None:
-    try:
-        _client.delete(index=INDEX_NAME, id=video_id)
-    except Exception:
-        pass
+    def delete(self, video_id: str) -> None:
+        try:
+            self.client.delete(index=self.index, id=video_id)
+        except Exception:
+            pass
