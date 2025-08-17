@@ -1,5 +1,3 @@
-"""Elasticsearch-backed storage implementation."""
-
 import os
 from typing import List, Optional
 
@@ -45,4 +43,3 @@ class ElasticsearchStorage(Storage[VideoMetadata]):
             self.client.delete(index=self.index, id=video_id)
         except Exception:
             pass
-

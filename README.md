@@ -7,8 +7,6 @@ This repository hosts a Python monorepo intended for multiple microservices. At 
 - `libs/` – shared libraries for messaging, storage and data models.
 - `services/video_metadata_service/` – FastAPI application handling RabbitMQ messages and HTTP requests.
 
-The messaging and storage layers are accessed through abstract interfaces, allowing alternative backends (e.g., Kafka, MongoDB) to be injected without changing service code.
-
 ## Running the service
 
 1. Install dependencies:

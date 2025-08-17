@@ -1,5 +1,3 @@
-"""Domain and DTO models for video metadata."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,7 +6,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
-
 
 class AlgorithmType(str, Enum):
     ACTION_RECOGNITION = "actionRecognition"

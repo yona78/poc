@@ -74,4 +74,3 @@ def update_video(
 def delete_video(video_id: str, storage: Storage[VideoMetadata] = Depends(get_storage)) -> Dict[str, str]:
     storage.delete(video_id)
     return {"status": "deleted"}
-
