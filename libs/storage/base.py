@@ -1,33 +1,37 @@
+"""Abstract storage interfaces."""
+
 from abc import ABC, abstractmethod
-from typing import List, Optional
-
-from libs.models.video_metadata import VideoMetadata
+from typing import Generic, List, Optional, TypeVar
 
 
-class Storage(ABC):
-    """Abstract storage interface for video metadata."""
+T = TypeVar("T")
+
+
+class Storage(ABC, Generic[T]):
+    """Abstract storage interface."""
 
     @abstractmethod
-    def create(self, metadata: VideoMetadata) -> None:
-        """Persist metadata for a video."""
+    def create(self, obj: T) -> None:
+        """Persist *obj*."""
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, video_id: str) -> Optional[VideoMetadata]:
-        """Retrieve metadata for *video_id*."""
+    def get(self, obj_id: str) -> Optional[T]:
+        """Retrieve object by *obj_id*."""
         raise NotImplementedError
 
     @abstractmethod
-    def list(self) -> List[VideoMetadata]:
-        """List all stored video metadata."""
+    def list(self) -> List[T]:
+        """List all stored objects."""
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, video_id: str, metadata: VideoMetadata) -> None:
-        """Update metadata for *video_id*."""
+    def update(self, obj_id: str, obj: T) -> None:
+        """Update object identified by *obj_id*."""
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, video_id: str) -> None:
-        """Delete metadata for *video_id*."""
+    def delete(self, obj_id: str) -> None:
+        """Delete object identified by *obj_id*."""
         raise NotImplementedError
+

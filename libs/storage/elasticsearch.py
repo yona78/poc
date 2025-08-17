@@ -1,13 +1,15 @@
+"""Elasticsearch-backed storage implementation."""
+
 import os
 from typing import List, Optional
 
 from elasticsearch import Elasticsearch
 
-from libs.models.video_metadata import VideoMetadata
+from libs.models.video_metadata import VideoMetadata, VideoMetadataDTO
 from .base import Storage
 
 
-class ElasticsearchStorage(Storage):
+class ElasticsearchStorage(Storage[VideoMetadata]):
     """Elasticsearch-backed storage implementation."""
 
     def __init__(self, host: Optional[str] = None, index: Optional[str] = None) -> None:
@@ -16,7 +18,8 @@ class ElasticsearchStorage(Storage):
         self.client = Elasticsearch(self.host)
 
     def create(self, metadata: VideoMetadata) -> None:
-        self.client.index(index=self.index, id=metadata.video_id, document=metadata.dict())
+        dto = VideoMetadataDTO.from_domain(metadata)
+        self.client.index(index=self.index, id=metadata.video_id, document=dto.dict())
 
     def get(self, video_id: str) -> Optional[VideoMetadata]:
         try:
@@ -26,18 +29,20 @@ class ElasticsearchStorage(Storage):
         source = res.get("_source")
         if not source:
             return None
-        return VideoMetadata(**source)
+        return VideoMetadataDTO(**source).to_domain()
 
     def list(self) -> List[VideoMetadata]:
         res = self.client.search(index=self.index, body={"query": {"match_all": {}}})
         hits = res.get("hits", {}).get("hits", [])
-        return [VideoMetadata(**hit["_source"]) for hit in hits]
+        return [VideoMetadataDTO(**hit["_source"]).to_domain() for hit in hits]
 
     def update(self, video_id: str, metadata: VideoMetadata) -> None:
-        self.client.index(index=self.index, id=video_id, document=metadata.dict())
+        dto = VideoMetadataDTO.from_domain(metadata)
+        self.client.index(index=self.index, id=video_id, document=dto.dict())
 
     def delete(self, video_id: str) -> None:
         try:
             self.client.delete(index=self.index, id=video_id)
         except Exception:
             pass
+
