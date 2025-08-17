@@ -31,3 +31,19 @@ python tools/generate_mocks.py --count 5
 ```
 
 This script creates valid `VideoMetadataDTO` payloads and sends them to the configured RabbitMQ queue.
+
+## API documentation
+
+Interactive Swagger UI is available once the service is running at:
+
+```
+http://localhost:8000/docs
+```
+
+To generate a standalone OpenAPI schema file, execute:
+
+```bash
+python tools/generate_openapi.py
+```
+
+The schema will be written to `docs/openapi.json`.
