@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from elasticsearch import Elasticsearch
 
@@ -43,3 +43,8 @@ class ElasticsearchStorage(Storage[VideoMetadata]):
             self.client.delete(index=self.index, id=video_id)
         except Exception:
             pass
+
+    def search(self, query: Dict[str, Any]) -> List[VideoMetadata]:
+        res = self.client.search(index=self.index, body=query)
+        hits = res.get("hits", {}).get("hits", [])
+        return [VideoMetadataDTO(**hit["_source"]).to_domain() for hit in hits]

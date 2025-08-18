@@ -1,7 +1,5 @@
-"""Abstract storage interfaces."""
-
 from abc import ABC, abstractmethod
-from typing import Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 
 T = TypeVar("T")
@@ -35,3 +33,7 @@ class Storage(ABC, Generic[T]):
         """Delete object identified by *obj_id*."""
         raise NotImplementedError
 
+    @abstractmethod
+    def search(self, query: Dict[str, Any]) -> List[T]:
+        """Search for objects matching an Elasticsearch-style *query*."""
+        raise NotImplementedError

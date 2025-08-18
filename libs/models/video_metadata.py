@@ -101,7 +101,13 @@ class VideoMetadataDTO(BaseModel):
             extra=meta.extra,
         )
 
+class EnrichedVideoMetadataDTO(BaseModel):
+    metadata: VideoMetadataDTO
+    mongo: Optional[Dict[str, Any]] = None
 
+    class Config:
+        extra = "forbid"
+        
 class VideoMetadataUpdateDTO(BaseModel):
     timestamp: Optional[datetime] = None
     algorithms: Optional[List[AlgorithmResultDTO]] = None

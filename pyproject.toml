@@ -8,7 +8,8 @@ dependencies = [
     "uvicorn[standard]",
     "pika",
     "elasticsearch",
-    "pydantic"
+    "pydantic",
+    "pymongo"
 ]
 
 [build-system]

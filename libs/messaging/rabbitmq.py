@@ -1,4 +1,5 @@
-import  json
+import json
+
 import os
 import threading
 from typing import Callable, Optional, Type, TypeVar, Generic
