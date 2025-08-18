@@ -31,7 +31,6 @@ Missing values will cause the service to fail fast with a validation error.
    ```bash
    uvicorn services.video_metadata_service.app:app
    ```
-
 The application will automatically start a background consumer for the `video_metadata` queue and index incoming messages into Elasticsearch. API clients cannot create records directly; new metadata is only persisted when received from RabbitMQ.
 
 ## Development tools

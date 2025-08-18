@@ -1,5 +1,3 @@
-"""Domain and DTO models for video metadata."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,7 +6,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
-
 
 class AlgorithmType(str, Enum):
     ACTION_RECOGNITION = "actionRecognition"
@@ -104,15 +101,13 @@ class VideoMetadataDTO(BaseModel):
             extra=meta.extra,
         )
 
-
 class EnrichedVideoMetadataDTO(BaseModel):
     metadata: VideoMetadataDTO
     mongo: Optional[Dict[str, Any]] = None
 
     class Config:
         extra = "forbid"
-
-
+        
 class VideoMetadataUpdateDTO(BaseModel):
     timestamp: Optional[datetime] = None
     algorithms: Optional[List[AlgorithmResultDTO]] = None
