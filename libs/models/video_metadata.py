@@ -107,7 +107,7 @@ class EnrichedVideoMetadataDTO(BaseModel):
 
     class Config:
         extra = "forbid"
-        
+
 class VideoMetadataUpdateDTO(BaseModel):
     timestamp: Optional[datetime] = None
     algorithms: Optional[List[AlgorithmResultDTO]] = None

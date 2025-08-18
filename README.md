@@ -72,3 +72,14 @@ The `/videos/search_with_mongo` endpoint performs the same search and enriches e
 ## Logging
 
 Application logs are written to the console and to a dedicated Elasticsearch index specified by `LOG_ELASTICSEARCH_URL` and `LOG_ELASTICSEARCH_INDEX`.
+
+## Docker deployment
+
+1. Copy `.env.example` to `.env` and adjust any values.
+2. Build and run the stack with Docker Compose:
+   ```bash
+   docker compose up --build
+   ```
+   The service will be available at [http://localhost:8000](http://localhost:8000).
+
+The compose file also launches RabbitMQ, Elasticsearch, and MongoDB containers used by the service.
