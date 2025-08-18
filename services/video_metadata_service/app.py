@@ -1,5 +1,3 @@
-"""FastAPI application for video metadata management."""
-
 import logging
 
 from fastapi import FastAPI

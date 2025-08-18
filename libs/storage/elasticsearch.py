@@ -1,5 +1,3 @@
-"""Elasticsearch-backed storage implementation."""
-
 import os
 from typing import Any, Dict, List, Optional
 
@@ -50,4 +48,3 @@ class ElasticsearchStorage(Storage[VideoMetadata]):
         res = self.client.search(index=self.index, body=query)
         hits = res.get("hits", {}).get("hits", [])
         return [VideoMetadataDTO(**hit["_source"]).to_domain() for hit in hits]
-

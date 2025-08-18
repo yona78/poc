@@ -1,5 +1,3 @@
-"""RabbitMQ message broker implementation."""
-
 import json
 import os
 import threading
@@ -49,4 +47,3 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
 
         thread = threading.Thread(target=_consume, daemon=True)
         thread.start()
-

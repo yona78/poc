@@ -1,5 +1,3 @@
-"""Abstract storage interfaces."""
-
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
@@ -39,4 +37,3 @@ class Storage(ABC, Generic[T]):
     def search(self, query: Dict[str, Any]) -> List[T]:
         """Search for objects matching an Elasticsearch-style *query*."""
         raise NotImplementedError
-
