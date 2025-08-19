@@ -1,7 +1,6 @@
-import json
-from typing import List
+from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
@@ -32,21 +31,15 @@ def list_videos(
 
 @router.get("/videos/search", response_model=List[VideoMetadataDTO])
 def search_videos(
-    query: str, service: VideoMetadataService = Depends(get_service)
+    query: Dict[str, Any] = Body(...),
+    service: VideoMetadataService = Depends(get_service),
 ) -> List[VideoMetadataDTO]:
-    try:
-        query_dict = json.loads(query)
-    except json.JSONDecodeError as exc:  # pragma: no cover - validation
-        raise HTTPException(status_code=400, detail="Invalid JSON query") from exc
-    return service.search(query_dict)
+    return service.search(query)
 
 
 @router.get("/videos/search_with_mongo", response_model=List[EnrichedVideoMetadataDTO])
 def search_videos_with_mongo(
-    query: str, service: VideoMetadataService = Depends(get_service)
+    query: Dict[str, Any] = Body(...),
+    service: VideoMetadataService = Depends(get_service),
 ) -> List[EnrichedVideoMetadataDTO]:
-    try:
-        query_dict = json.loads(query)
-    except json.JSONDecodeError as exc:  # pragma: no cover - validation
-        raise HTTPException(status_code=400, detail="Invalid JSON query") from exc
-    return service.search_with_mongo(query_dict)
+    return service.search_with_mongo(query)

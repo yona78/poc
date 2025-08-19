@@ -71,13 +71,21 @@ The schema will be written to `docs/openapi.json`.
 
 ## Advanced querying
 
-Complex queries can be issued against the metadata index using raw Elasticsearch DSL:
+Complex queries can be issued against the metadata index by sending raw Elasticsearch DSL in the request body:
 
 ```bash
-curl 'http://localhost:8000/videos/search?query={"query":{"match_all":{}}}'
+curl -X GET 'http://localhost:8000/videos/search' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":{"match_all":{}}}'
 ```
 
-The `/videos/search_with_mongo` endpoint performs the same search and enriches each hit with a document from MongoDB sharing the same `video_id`.
+The `/videos/search_with_mongo` endpoint performs the same search and enriches each hit with a document from MongoDB sharing the same `video_id`:
+
+```bash
+curl -X GET 'http://localhost:8000/videos/search_with_mongo' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":{"match_all":{}}}'
+```
 
 ## Logging
 
