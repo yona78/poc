@@ -51,7 +51,7 @@ To publish random video metadata messages for testing, run:
 python tools/generate_mocks.py --count 5
 ```
 
-This script creates valid `VideoMetadataDTO` payloads and sends them to the configured RabbitMQ queue.
+This script creates valid `VideoMetadataWithActionsDTO` payloads and sends them to the configured RabbitMQ queue.
 
 ## API documentation
 

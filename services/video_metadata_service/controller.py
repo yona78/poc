@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
-    VideoMetadataDTO,
+    VideoMetadataWithActionsDTO,
 )
 
 from .dependencies import get_service
@@ -13,28 +13,28 @@ from .service import VideoMetadataService
 router = APIRouter()
 
 
-@router.get("/videos/{video_id}", response_model=VideoMetadataDTO)
+@router.get("/videos/{video_id}", response_model=VideoMetadataWithActionsDTO)
 def read_video(
     video_id: str, service: VideoMetadataService = Depends(get_service)
-) -> VideoMetadataDTO:
+) -> VideoMetadataWithActionsDTO:
     data = service.get(video_id)
     if not data:
         raise HTTPException(status_code=404, detail="Video metadata not found")
     return data
 
 
-@router.get("/videos", response_model=List[VideoMetadataDTO])
+@router.get("/videos", response_model=List[VideoMetadataWithActionsDTO])
 def list_videos(
     service: VideoMetadataService = Depends(get_service),
-) -> List[VideoMetadataDTO]:
+) -> List[VideoMetadataWithActionsDTO]:
     return service.list()
 
 
-@router.get("/videos/search", response_model=List[VideoMetadataDTO])
+@router.get("/videos/search", response_model=List[VideoMetadataWithActionsDTO])
 def search_videos(
     query: Dict[str, Any] = Body(...),
     service: VideoMetadataService = Depends(get_service),
-) -> List[VideoMetadataDTO]:
+) -> List[VideoMetadataWithActionsDTO]:
     return service.search(query)
 
 

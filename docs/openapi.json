@@ -15,7 +15,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+                  "items": {"$ref": "#/components/schemas/VideoMetadataWithActionsDTO"}
                 }
               }
             }
@@ -34,7 +34,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+                "schema": {"$ref": "#/components/schemas/VideoMetadataWithActionsDTO"}
               }
             }
           },
@@ -48,9 +48,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {"type": "object"}
-            }
+            "application/json": {"schema": {"type": "object"}}
           }
         },
         "responses": {
@@ -60,7 +58,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+                  "items": {"$ref": "#/components/schemas/VideoMetadataWithActionsDTO"}
                 }
               }
             }
@@ -74,9 +72,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
-              "schema": {"type": "object"}
-            }
+            "application/json": {"schema": {"type": "object"}}
           }
         },
         "responses": {
@@ -97,6 +93,14 @@
   },
   "components": {
     "schemas": {
+      "CompanyDTO": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "name": {"type": "string"}
+        },
+        "required": ["id", "name"]
+      },
       "ActionRecognitionResultDTO": {
         "type": "object",
         "properties": {
@@ -108,34 +112,34 @@
         },
         "required": ["frame_num", "timestamp", "action", "confidence", "clip_length"]
       },
-      "AlgorithmResultDTO": {
-        "type": "object",
-        "properties": {
-          "type": {"type": "string"},
-          "results": {
-            "type": "array",
-            "items": {"$ref": "#/components/schemas/ActionRecognitionResultDTO"}
-          }
-        },
-        "required": ["type", "results"]
-      },
       "VideoMetadataDTO": {
         "type": "object",
         "properties": {
           "video_id": {"type": "string"},
           "timestamp": {"type": "string", "format": "date-time"},
-          "algorithms": {
-            "type": "array",
-            "items": {"$ref": "#/components/schemas/AlgorithmResultDTO"}
-          },
+          "company": {"$ref": "#/components/schemas/CompanyDTO"},
           "extra": {"type": "object"}
         },
-        "required": ["video_id", "timestamp", "algorithms", "extra"]
+        "required": ["video_id", "timestamp", "company", "extra"]
+      },
+      "VideoMetadataWithActionsDTO": {
+        "allOf": [
+          {"$ref": "#/components/schemas/VideoMetadataDTO"},
+          {
+            "type": "object",
+            "properties": {
+              "actions": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/ActionRecognitionResultDTO"}
+              }
+            }
+          }
+        ]
       },
       "EnrichedVideoMetadataDTO": {
         "type": "object",
         "properties": {
-          "metadata": {"$ref": "#/components/schemas/VideoMetadataDTO"},
+          "metadata": {"$ref": "#/components/schemas/VideoMetadataWithActionsDTO"},
           "mongo": {"type": "object"}
         },
         "required": ["metadata"]

@@ -10,9 +10,8 @@ import pika
 
 from libs.models.video_metadata import (
     ActionRecognitionResultDTO,
-    AlgorithmResultDTO,
-    AlgorithmType,
-    VideoMetadataDTO,
+    CompanyDTO,
+    VideoMetadataWithActionsDTO,
 )
 
 ACTIONS = ["walking", "running", "jumping", "waving"]
@@ -28,19 +27,20 @@ def random_action_recognition() -> ActionRecognitionResultDTO:
     )
 
 
-def random_metadata() -> VideoMetadataDTO:
-    algo = AlgorithmResultDTO(
-        type=AlgorithmType.ACTION_RECOGNITION,
-        results=[random_action_recognition() for _ in range(random.randint(1, 3))],
-    )
-    return VideoMetadataDTO(
+def random_company() -> CompanyDTO:
+    return CompanyDTO(id=random.randint(1, 1000), name=random.choice(["acme", "globex"]))
+
+
+def random_metadata() -> VideoMetadataWithActionsDTO:
+    return VideoMetadataWithActionsDTO(
         video_id=str(uuid.uuid4()),
         timestamp=datetime.utcnow(),
-        algorithms=[algo],
+        company=random_company(),
+        actions=[random_action_recognition() for _ in range(random.randint(1, 3))],
     )
 
 
-def publish_message(meta: VideoMetadataDTO, url: str, queue: str) -> None:
+def publish_message(meta: VideoMetadataWithActionsDTO, url: str, queue: str) -> None:
     connection = pika.BlockingConnection(pika.URLParameters(url))
     channel = connection.channel()
     channel.queue_declare(queue=queue, durable=True)

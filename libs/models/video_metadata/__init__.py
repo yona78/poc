@@ -2,24 +2,26 @@
 
 from .dto import (
     ActionRecognitionResultDTO,
-    AlgorithmResultDTO,
+    CompanyDTO,
     EnrichedVideoMetadataDTO,
     VideoMetadataDTO,
+    VideoMetadataWithActionsDTO,
 )
 from .types import (
     ActionRecognitionResult,
-    AlgorithmResult,
-    AlgorithmType,
+    Company,
     VideoMetadata,
+    VideoMetadataWithActions,
 )
 
 __all__ = [
     "ActionRecognitionResult",
     "ActionRecognitionResultDTO",
-    "AlgorithmResult",
-    "AlgorithmResultDTO",
-    "AlgorithmType",
+    "Company",
+    "CompanyDTO",
     "EnrichedVideoMetadataDTO",
     "VideoMetadata",
     "VideoMetadataDTO",
+    "VideoMetadataWithActions",
+    "VideoMetadataWithActionsDTO",
 ]

@@ -3,7 +3,7 @@ from fastapi import Request
 
 from libs.di import create_database, create_message_broker
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
-from libs.models.video_metadata import VideoMetadataDTO
+from libs.models.video_metadata import VideoMetadataWithActionsDTO
 
 from .service import VideoMetadataService
 from .settings import settings
@@ -30,7 +30,7 @@ def init_app(app) -> None:
     """Initialize and wire service dependencies."""
     logger = get_logger()
     primary_db = create_database(
-        VideoMetadataDTO,
+        VideoMetadataWithActionsDTO,
         backend="elasticsearch",
         host=settings.elasticsearch_url,
         index=settings.elasticsearch_index,
@@ -48,7 +48,7 @@ def init_app(app) -> None:
     app.state.service = service
 
     broker = create_message_broker(
-        VideoMetadataDTO,
+        VideoMetadataWithActionsDTO,
         url=settings.broker_url,
         queue_name=settings.video_metadata_queue,
     )
