@@ -13,6 +13,7 @@ class ServiceSettings(BaseSettings):
     broker_password: str
     source_queue: str
     algo_queue: str
+    dead_letter_queue: str
     target_video_ids: List[str]
     log_elasticsearch_url: str
     log_elasticsearch_index: str

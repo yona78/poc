@@ -60,6 +60,12 @@ python tools/generate_mocks.py --count 5
 
 This script creates valid `VideoMetadataWithActionsDTO` payloads and sends them to the configured RabbitMQ queue.
 
+To exercise the filter service's source queue, a separate helper can publish plain `VideoMetadataDTO` messages:
+
+```bash
+python tools/generate_filter_mocks.py --count 5
+```
+
 ## API documentation
 
 Interactive Swagger UI is available once the service is running at:

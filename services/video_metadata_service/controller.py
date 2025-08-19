@@ -8,7 +8,7 @@ from libs.models.video_metadata import (
 )
 
 from .dependencies import get_service
-from libs.services import VideoMetadataService
+from .service import VideoMetadataService
 
 router = APIRouter()
 

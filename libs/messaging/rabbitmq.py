@@ -6,7 +6,7 @@ import threading
 from typing import Callable, Optional, Type, TypeVar, Generic
 
 import pika
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from .base import MessageBroker
 
@@ -25,6 +25,8 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
         username: Optional[str] = None,
         password: Optional[str] = None,
         queue_name: Optional[str] = None,
+        dead_letter_queue: Optional[str] = None,
+        max_retries: int = 3,
     ) -> None:
         self.model = model
         self.host = host or os.getenv("BROKER_HOST", "localhost")
@@ -32,6 +34,8 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
         self.username = username or os.getenv("BROKER_USER", "guest")
         self.password = password or os.getenv("BROKER_PASSWORD", "guest")
         self.queue = queue_name or os.getenv("VIDEO_METADATA_QUEUE", "default_queue")
+        self.dead_letter_queue = dead_letter_queue or f"{self.queue}.dlq"
+        self.max_retries = max_retries
 
     def _connection_params(self) -> pika.ConnectionParameters:
         credentials = pika.PlainCredentials(self.username, self.password)
@@ -52,10 +56,17 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
                 try:
                     payload = json.loads(body)
                     message = self.model.parse_obj(payload)
-                except ValidationError:
-                    pass
-                else:
                     callback(message)
+                except Exception:
+                    headers = properties.headers or {}
+                    attempt = int(headers.get("x-retries", 0)) + 1
+                    target = self.queue if attempt < self.max_retries else self.dead_letter_queue
+                    ch.basic_publish(
+                        exchange="",
+                        routing_key=target,
+                        body=body,
+                        properties=pika.BasicProperties(headers={"x-retries": attempt}),
+                    )
                 finally:
                     ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -65,7 +76,9 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
         thread = threading.Thread(target=_consume, daemon=True)
         thread.start()
 
-    def publish(self, message: T, queue_name: Optional[str] = None) -> None:
+    def publish(
+        self, message: T, queue_name: Optional[str] = None, headers: Optional[dict] = None
+    ) -> None:
         target = queue_name or self.queue
         params = self._connection_params()
         connection = pika.BlockingConnection(params)
@@ -75,6 +88,7 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
             exchange="",
             routing_key=target,
             body=message.json().encode(),
+            properties=pika.BasicProperties(headers=headers),
         )
         connection.close()
 

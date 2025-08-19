@@ -18,6 +18,7 @@ class ServiceSettings(BaseSettings):
     mongodb_url: str
     mongodb_db: str
     mongodb_collection: str
+    dead_letter_queue: str
 
     class Config:
         env_file = Path(__file__).resolve().parent / ".env"

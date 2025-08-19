@@ -1,15 +1,15 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from libs.database.base import Database
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
     VideoMetadataWithActionsDTO,
 )
-from libs.database.base import Database
 
 
 class VideoMetadataService:
-    """Business logic for handling video metadata operations."""
+    """Business logic for serving video metadata to clients."""
 
     def __init__(
         self,
@@ -20,13 +20,6 @@ class VideoMetadataService:
         self._storage = storage
         self._mongo = mongo
         self._logger = logger
-
-    def create_from_message(self, dto: VideoMetadataWithActionsDTO) -> None:
-        """Persist metadata received from the message broker."""
-        self._logger.info(
-            "Creating video metadata", extra={"labels": {"video_id": dto.video_id}}
-        )
-        self._storage.create(dto)
 
     def get(self, video_id: str) -> Optional[VideoMetadataWithActionsDTO]:
         return self._storage.get(video_id)

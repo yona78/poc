@@ -4,7 +4,8 @@ from fastapi import Request
 from libs.di import create_database
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
 from libs.models.video_metadata import VideoMetadataWithActionsDTO
-from libs.services import VideoMetadataService
+
+from .service import VideoMetadataService
 
 from .settings import settings
 

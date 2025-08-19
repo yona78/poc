@@ -44,6 +44,8 @@ def startup_event() -> None:
     consumer = create_message_broker(
         VideoMetadataDTO,
         queue_name=settings.source_queue,
+        dead_letter_queue=settings.dead_letter_queue,
+        max_retries=3,
         **broker_kwargs,
     )
     publisher = create_message_broker(
@@ -51,26 +53,20 @@ def startup_event() -> None:
         queue_name=settings.algo_queue,
         **broker_kwargs,
     )
-    resolver = VideoIdResolver(settings.target_video_ids)
+    resolver = VideoIdResolver(settings.target_video_ids, settings.algo_queue)
 
     app.state.logger = logger
     app.state.consumer = consumer
     app.state.publisher = publisher
     app.state.resolver = resolver
 
+    publishers = {settings.algo_queue: publisher}
+
     def process(message: VideoMetadataDTO) -> None:
         logger.debug(
             "Received message", extra={"labels": {"video_id": message.video_id}}
         )
-        if resolver.resolve(message):
-            publisher.publish(message)
-            logger.info(
-                "Forwarded message", extra={"labels": {"video_id": message.video_id}}
-            )
-        else:
-            logger.info(
-                "Dropped message", extra={"labels": {"video_id": message.video_id}}
-            )
+        resolver.handle(message, publishers, logger)
 
     logger.info(
         "Consuming from %s and publishing to %s",
