@@ -18,7 +18,7 @@ from .controller import router
 from .service import VideoMetadataService, set_service
 
 logger = logging.getLogger("video_metadata_service")
-logger.setLevel(getattr(logging, settings.log_level.upper(), logging.INFO))
+logger.setLevel(logging.INFO)
 
 formatter = JsonFormatter()
 console_handler = logging.StreamHandler()

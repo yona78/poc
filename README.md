@@ -15,10 +15,10 @@ The messaging and storage layers are accessed through abstract, type-aware inter
 
 ## Configuration
 
-Each microservice reads its configuration from a dedicated `.env` file at the repository root:
+Each microservice ships with its own `.env` file inside its service directory:
 
-- `.env.video_metadata_service` – RabbitMQ, Elasticsearch, MongoDB, and log settings for the API service.
-- `.env.filter_service` – RabbitMQ queues, target `video_id`, and log settings for the filter.
+- `services/video_metadata_service/.env` – RabbitMQ, Elasticsearch, MongoDB, and log settings for the API service.
+- `services/filter_service/.env` – RabbitMQ queues, target `video_id`, and log settings for the filter.
 
 Settings are validated with Pydantic so missing values cause an early failure.
 
@@ -29,7 +29,7 @@ Settings are validated with Pydantic so missing values cause an early failure.
    pip install -e .
    ```
    This installs the project in editable mode so the shared `libs` and service packages are available on the Python path.
-2. Copy `.env.video_metadata_service` and `.env.filter_service` and adjust any values as needed.
+2. Copy the env files above and adjust any values as needed.
 3. Run the services with Uvicorn:
    ```bash
    uvicorn services.video_metadata_service.app:app
@@ -76,7 +76,7 @@ The `/videos/search_with_mongo` endpoint performs the same search and enriches e
 
 ## Logging
 
-Application logs are JSON-formatted with configurable levels and optional `labels`. Logs are written to the console and to a dedicated Elasticsearch index specified by `LOG_ELASTICSEARCH_URL` and `LOG_ELASTICSEARCH_INDEX` in each service's env file.
+Application logs are JSON-formatted with ECS base fields (`@timestamp`, `log.level`, `message`) and optional `labels`. Logs are written to the console and to a dedicated Elasticsearch index specified by `LOG_ELASTICSEARCH_URL` and `LOG_ELASTICSEARCH_INDEX` in each service's env file.
 
 ## Docker deployment
 

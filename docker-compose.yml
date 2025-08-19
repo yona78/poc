@@ -1,8 +1,10 @@
 version: "3.9"
 services:
   video_metadata_service:
-    build: .
-    env_file: .env.video_metadata_service
+    build:
+      context: .
+      dockerfile: services/video_metadata_service/Dockerfile
+    env_file: services/video_metadata_service/.env
     command: uvicorn services.video_metadata_service.app:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
@@ -11,8 +13,10 @@ services:
       - elasticsearch
       - mongo
   filter_service:
-    build: .
-    env_file: .env.filter_service
+    build:
+      context: .
+      dockerfile: services/filter_service/Dockerfile
+    env_file: services/filter_service/.env
     command: uvicorn services.filter_service.app:app --host 0.0.0.0 --port 8001
     depends_on:
       - rabbitmq

@@ -12,7 +12,7 @@ from .settings import settings
 
 
 logger = logging.getLogger("filter_service")
-logger.setLevel(getattr(logging, settings.log_level.upper(), logging.INFO))
+logger.setLevel(logging.INFO)
 
 formatter = JsonFormatter()
 console_handler = logging.StreamHandler()

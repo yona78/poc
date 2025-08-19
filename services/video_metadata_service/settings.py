@@ -1,5 +1,7 @@
 """Settings for the video metadata service."""
 
+from pathlib import Path
+
 from pydantic import AnyUrl, BaseSettings
 
 
@@ -13,10 +15,9 @@ class ServiceSettings(BaseSettings):
     mongodb_url: AnyUrl
     mongodb_db: str
     mongodb_collection: str
-    log_level: str = "INFO"
 
     class Config:
-        env_file = ".env.video_metadata_service"
+        env_file = Path(__file__).resolve().parent / ".env"
         case_sensitive = False
 
 

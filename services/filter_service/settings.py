@@ -1,5 +1,7 @@
 """Settings for the message filter service."""
 
+from pathlib import Path
+
 from pydantic import AnyUrl, BaseSettings
 
 
@@ -10,10 +12,9 @@ class ServiceSettings(BaseSettings):
     target_video_id: str
     log_elasticsearch_url: AnyUrl
     log_elasticsearch_index: str
-    log_level: str = "INFO"
 
     class Config:
-        env_file = ".env.filter_service"
+        env_file = Path(__file__).resolve().parent / ".env"
         case_sensitive = False
 
 

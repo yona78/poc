@@ -18,10 +18,9 @@ class ElasticsearchLogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover - best effort
         try:
             doc: Dict[str, Any] = {
-                "timestamp": datetime.utcfromtimestamp(record.created).isoformat(),
-                "level": record.levelname,
-                "logger": record.name,
+                "@timestamp": datetime.utcfromtimestamp(record.created).isoformat(),
                 "message": record.getMessage(),
+                "log": {"level": record.levelname, "logger": record.name},
                 "labels": getattr(record, "labels", {}),
             }
             self.client.index(index=self.index, document=doc)
