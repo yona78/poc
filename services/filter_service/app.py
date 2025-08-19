@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
 from libs.messaging.rabbitmq import RabbitMQBroker
 from libs.models.video_metadata import VideoMetadataDTO
+from libs.resolvers import VideoIdResolver
 
 from .settings import settings
 
@@ -37,12 +38,14 @@ publisher = RabbitMQBroker(
     queue_name=settings.algo_queue,
 )
 
+resolver = VideoIdResolver(settings.target_video_id)
+
 
 def process(message: VideoMetadataDTO) -> None:
     logger.debug(
         "Received message", extra={"labels": {"video_id": message.video_id}}
     )
-    if message.video_id == settings.target_video_id:
+    if resolver.resolve(message):
         publisher.publish(message)
         logger.info(
             "Forwarded message", extra={"labels": {"video_id": message.video_id}}

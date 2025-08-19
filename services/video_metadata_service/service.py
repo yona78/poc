@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
@@ -7,7 +7,6 @@ from libs.models.video_metadata import (
     VideoMetadataUpdateDTO,
 )
 from libs.storage.base import Storage
-from libs.storage.mongo import MongoStorage
 
 
 class VideoMetadataService:
@@ -16,7 +15,7 @@ class VideoMetadataService:
     def __init__(
         self,
         storage: Storage[VideoMetadataDTO],
-        mongo: MongoStorage,
+        mongo: Storage[Dict[str, Any]],
         logger: logging.Logger,
     ) -> None:
         self._storage = storage
