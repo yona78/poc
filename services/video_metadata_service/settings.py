@@ -2,17 +2,17 @@
 
 from pathlib import Path
 
-from pydantic import AnyUrl, BaseSettings
+from pydantic import BaseSettings
 
 
 class ServiceSettings(BaseSettings):
-    broker_url: AnyUrl
+    broker_url: str
     video_metadata_queue: str
-    elasticsearch_url: AnyUrl
+    elasticsearch_url: str
     elasticsearch_index: str
-    log_elasticsearch_url: AnyUrl
+    log_elasticsearch_url: str
     log_elasticsearch_index: str
-    mongodb_url: AnyUrl
+    mongodb_url: str
     mongodb_db: str
     mongodb_collection: str
 

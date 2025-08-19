@@ -5,7 +5,7 @@ from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
     VideoMetadataDTO,
 )
-from libs.storage.base import Storage
+from libs.database.base import Database
 
 
 class VideoMetadataService:
@@ -13,8 +13,8 @@ class VideoMetadataService:
 
     def __init__(
         self,
-        storage: Storage[VideoMetadataDTO],
-        mongo: Storage[Dict[str, Any]],
+        storage: Database[VideoMetadataDTO],
+        mongo: Database[Dict[str, Any]],
         logger: logging.Logger,
     ) -> None:
         self._storage = storage

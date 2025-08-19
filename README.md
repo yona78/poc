@@ -7,11 +7,11 @@ This repository hosts a Python monorepo intended for multiple microservices. It 
 
 ## Structure
 
-- `libs/` – shared libraries for messaging, storage and data models.
+- `libs/` – shared libraries for messaging, database access and data models.
 - `services/video_metadata_service/` – FastAPI application handling broker messages and HTTP requests.
 - `services/filter_service/` – message filter that routes messages to algorithm queues.
 
-The messaging and storage layers are accessed through abstract, type-aware interfaces. Concrete RabbitMQ, Elasticsearch, and MongoDB implementations operate on generic Pydantic models, making it easy to plug in alternative backends or DTOs.
+The messaging and database layers are accessed through abstract, type-aware interfaces. Concrete RabbitMQ, Elasticsearch, and MongoDB implementations operate on generic Pydantic models, making it easy to plug in alternative backends or DTOs.
 
 ## Configuration
 
@@ -22,8 +22,8 @@ Each microservice ships with its own `.env` file inside its service directory:
 
 Settings are validated with Pydantic so missing values cause an early failure.
 
-The concrete message broker and storage backend are selected globally via the
-`MESSAGE_BROKER` and `STORAGE_BACKEND` environment variables. Switching from
+The concrete message broker and database backend are selected globally via the
+`MESSAGE_BROKER` and `DATABASE_BACKEND` environment variables. Switching from
 RabbitMQ to another broker or from Elasticsearch to a different database only
 requires changing these variables without modifying service code.
 

@@ -1,4 +1,4 @@
-"""Abstract storage interfaces."""
+"""Abstract database interfaces."""
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, List, Optional, TypeVar
@@ -7,8 +7,8 @@ from typing import Any, Dict, Generic, List, Optional, TypeVar
 T = TypeVar("T")
 
 
-class Storage(ABC, Generic[T]):
-    """Abstract storage interface."""
+class Database(ABC, Generic[T]):
+    """Abstract database interface."""
 
     @abstractmethod
     def create(self, obj: T) -> None:

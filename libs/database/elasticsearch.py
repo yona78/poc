@@ -1,4 +1,4 @@
-"""Generic Elasticsearch-backed storage implementation."""
+"""Generic Elasticsearch-backed database implementation."""
 
 import os
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
@@ -6,14 +6,14 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
-from .base import Storage
+from .base import Database
 
 
 T = TypeVar("T", bound=BaseModel)
 
 
-class ElasticsearchStorage(Storage[T], Generic[T]):
-    """Elasticsearch-backed storage for arbitrary Pydantic models."""
+class ElasticsearchDatabase(Database[T], Generic[T]):
+    """Elasticsearch-backed database for arbitrary Pydantic models."""
 
     def __init__(
         self,

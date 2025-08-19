@@ -4,10 +4,9 @@ import logging
 
 from fastapi import FastAPI
 
-from libs.di import create_message_broker, create_storage
+from libs.di import create_message_broker, create_database
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
 from libs.models.video_metadata import VideoMetadataDTO
-from libs.storage.mongo import MongoStorage
 
 from .settings import settings
 
@@ -29,22 +28,22 @@ logger.addHandler(es_handler)
 
 app = FastAPI(title="Video Metadata Service")
 
-storage_backend = create_storage(
+primary_db = create_database(
     VideoMetadataDTO,
+    backend="elasticsearch",
     host=settings.elasticsearch_url,
     index=settings.elasticsearch_index,
+    id_field="video_id",
+)
+mongo_db = create_database(
+    dict,
+    backend="mongo",
     url=settings.mongodb_url,
     db=settings.mongodb_db,
     collection=settings.mongodb_collection,
     id_field="video_id",
 )
-mongo_backend = MongoStorage(
-    settings.mongodb_url,
-    settings.mongodb_db,
-    settings.mongodb_collection,
-    id_field="video_id",
-)
-service = VideoMetadataService(storage_backend, mongo_backend, logger)
+service = VideoMetadataService(primary_db, mongo_db, logger)
 set_service(service)
 
 message_broker = create_message_broker(

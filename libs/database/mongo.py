@@ -1,18 +1,18 @@
-"""Generic MongoDB storage implementation."""
+"""Generic MongoDB database implementation."""
 
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 from pymongo import MongoClient
 
-from .base import Storage
+from .base import Database
 
 
 T = TypeVar("T")
 
 
-class MongoStorage(Storage[T], Generic[T]):
-    """MongoDB-backed storage for arbitrary objects."""
+class MongoDatabase(Database[T], Generic[T]):
+    """MongoDB-backed database for arbitrary objects."""
 
     def __init__(
         self,

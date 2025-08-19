@@ -6,17 +6,17 @@ from typing import Any, Type
 
 from .messaging.base import MessageBroker
 from .messaging.rabbitmq import RabbitMQBroker
-from .storage.base import Storage
-from .storage.elasticsearch import ElasticsearchStorage
-from .storage.mongo import MongoStorage
+from .database.base import Database
+from .database.elasticsearch import ElasticsearchDatabase
+from .database.mongo import MongoDatabase
 
 BROKERS = {
     "rabbitmq": RabbitMQBroker,
 }
 
-STORAGES = {
-    "elasticsearch": ElasticsearchStorage,
-    "mongo": MongoStorage,
+DATABASES = {
+    "elasticsearch": ElasticsearchDatabase,
+    "mongo": MongoDatabase,
 }
 
 
@@ -34,9 +34,9 @@ def create_message_broker(model: Type, **kwargs: Any) -> MessageBroker:
     return _construct(cls, model, kwargs)
 
 
-def create_storage(model: Type, **kwargs: Any) -> Storage:
-    name = os.getenv("STORAGE_BACKEND", "elasticsearch").lower()
-    cls = STORAGES.get(name)
+def create_database(model: Type, backend: str | None = None, **kwargs: Any) -> Database:
+    name = (backend or os.getenv("DATABASE_BACKEND", "elasticsearch")).lower()
+    cls = DATABASES.get(name)
     if cls is None:  # pragma: no cover - defensive
-        raise ValueError(f"Unknown storage backend '{name}'")
+        raise ValueError(f"Unknown database backend '{name}'")
     return _construct(cls, model, kwargs)
