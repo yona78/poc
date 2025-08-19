@@ -13,52 +13,59 @@ from .resolver import VideoIdResolver
 from .settings import settings
 
 
-logger = logging.getLogger("filter_service")
-logger.setLevel(logging.INFO)
-
-formatter = JsonFormatter()
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-
-es_handler = ElasticsearchLogHandler(
-    settings.log_elasticsearch_url, settings.log_elasticsearch_index
-)
-logger.addHandler(es_handler)
-
 app = FastAPI(title="Message Filter Service")
 
-consumer = create_message_broker(
-    VideoMetadataDTO,
-    url=settings.broker_url,
-    queue_name=settings.source_queue,
-)
-publisher = create_message_broker(
-    VideoMetadataDTO,
-    url=settings.broker_url,
-    queue_name=settings.algo_queue,
-)
 
-resolver = VideoIdResolver(settings.target_video_ids)
+def _configure_logger() -> logging.Logger:
+    logger = logging.getLogger("filter_service")
+    if not logger.handlers:
+        formatter = JsonFormatter()
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
 
-
-def process(message: VideoMetadataDTO) -> None:
-    logger.debug(
-        "Received message", extra={"labels": {"video_id": message.video_id}}
-    )
-    if resolver.resolve(message):
-        publisher.publish(message)
-        logger.info(
-            "Forwarded message", extra={"labels": {"video_id": message.video_id}}
+        es_handler = ElasticsearchLogHandler(
+            settings.log_elasticsearch_url, settings.log_elasticsearch_index
         )
-    else:
-        logger.info(
-            "Dropped message", extra={"labels": {"video_id": message.video_id}}
-        )
+        logger.addHandler(es_handler)
+        logger.setLevel(logging.INFO)
+    return logger
 
 
 @app.on_event("startup")
 def startup_event() -> None:
+    logger = _configure_logger()
+    consumer = create_message_broker(
+        VideoMetadataDTO,
+        url=settings.broker_url,
+        queue_name=settings.source_queue,
+    )
+    publisher = create_message_broker(
+        VideoMetadataDTO,
+        url=settings.broker_url,
+        queue_name=settings.algo_queue,
+    )
+    resolver = VideoIdResolver(settings.target_video_ids)
+
+    app.state.logger = logger
+    app.state.consumer = consumer
+    app.state.publisher = publisher
+    app.state.resolver = resolver
+
+    def process(message: VideoMetadataDTO) -> None:
+        logger.debug(
+            "Received message", extra={"labels": {"video_id": message.video_id}}
+        )
+        if resolver.resolve(message):
+            publisher.publish(message)
+            logger.info(
+                "Forwarded message", extra={"labels": {"video_id": message.video_id}}
+            )
+        else:
+            logger.info(
+                "Dropped message", extra={"labels": {"video_id": message.video_id}}
+            )
+
     logger.info(
         "Consuming from %s and publishing to %s",
         settings.source_queue,

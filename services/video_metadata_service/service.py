@@ -44,17 +44,3 @@ class VideoMetadataService:
             mongo_doc = self._mongo.get(dto.video_id)
             enriched.append(EnrichedVideoMetadataDTO(metadata=dto, mongo=mongo_doc))
         return enriched
-
-
-_service: Optional[VideoMetadataService] = None
-
-
-def set_service(service: VideoMetadataService) -> None:
-    global _service
-    _service = service
-
-
-def get_service() -> VideoMetadataService:
-    if _service is None:  # pragma: no cover - defensive
-        raise RuntimeError("Service not initialized")
-    return _service
