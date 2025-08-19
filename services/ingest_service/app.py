@@ -41,7 +41,10 @@ def main() -> None:
     service = VideoMetadataService(storage, mongo_db, logger)
     broker = create_message_broker(
         VideoMetadataWithActionsDTO,
-        url=settings.broker_url,
+        host=settings.broker_host,
+        port=settings.broker_port,
+        username=settings.broker_user,
+        password=settings.broker_password,
         queue_name=settings.video_metadata_queue,
     )
     broker.start_consuming(service.create_from_message)

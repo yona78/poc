@@ -18,17 +18,32 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
     """RabbitMQ implementation of the MessageBroker interface."""
 
     def __init__(
-        self, model: Type[T], url: Optional[str] = None, queue_name: Optional[str] = None
+        self,
+        model: Type[T],
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        queue_name: Optional[str] = None,
     ) -> None:
         self.model = model
-        self.url = url or os.getenv("BROKER_URL", "amqp://guest:guest@localhost:5672/")
+        self.host = host or os.getenv("BROKER_HOST", "localhost")
+        self.port = port or int(os.getenv("BROKER_PORT", "5672"))
+        self.username = username or os.getenv("BROKER_USER", "guest")
+        self.password = password or os.getenv("BROKER_PASSWORD", "guest")
         self.queue = queue_name or os.getenv("VIDEO_METADATA_QUEUE", "default_queue")
+
+    def _connection_params(self) -> pika.ConnectionParameters:
+        credentials = pika.PlainCredentials(self.username, self.password)
+        return pika.ConnectionParameters(
+            host=self.host, port=self.port, credentials=credentials
+        )
 
     def start_consuming(self, callback: Callable[[T], None]) -> None:
         """Start a background thread that consumes messages and passes them to *callback*."""
 
         def _consume() -> None:
-            params = pika.URLParameters(self.url)
+            params = self._connection_params()
             connection = pika.BlockingConnection(params)
             channel = connection.channel()
             channel.queue_declare(queue=self.queue, durable=True)
@@ -52,7 +67,7 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
 
     def publish(self, message: T, queue_name: Optional[str] = None) -> None:
         target = queue_name or self.queue
-        params = pika.URLParameters(self.url)
+        params = self._connection_params()
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=target, durable=True)

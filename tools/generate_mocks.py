@@ -40,8 +40,17 @@ def random_metadata() -> VideoMetadataWithActionsDTO:
     )
 
 
-def publish_message(meta: VideoMetadataWithActionsDTO, url: str, queue: str) -> None:
-    connection = pika.BlockingConnection(pika.URLParameters(url))
+def publish_message(
+    meta: VideoMetadataWithActionsDTO,
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    queue: str,
+) -> None:
+    credentials = pika.PlainCredentials(username, password)
+    params = pika.ConnectionParameters(host=host, port=port, credentials=credentials)
+    connection = pika.BlockingConnection(params)
     channel = connection.channel()
     channel.queue_declare(queue=queue, durable=True)
     channel.basic_publish(exchange="", routing_key=queue, body=meta.json())
@@ -52,9 +61,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Publish random video metadata mocks")
     parser.add_argument("--count", type=int, default=1, help="Number of messages to send")
     parser.add_argument(
-        "--url",
-        default=os.getenv("BROKER_URL", "amqp://guest:guest@localhost:5672/"),
-        help="Message broker connection URL",
+        "--host",
+        default=os.getenv("BROKER_HOST", "localhost"),
+        help="RabbitMQ host",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.getenv("BROKER_PORT", "5672")),
+        help="RabbitMQ port",
+    )
+    parser.add_argument(
+        "--username",
+        default=os.getenv("BROKER_USER", "guest"),
+        help="RabbitMQ username",
+    )
+    parser.add_argument(
+        "--password",
+        default=os.getenv("BROKER_PASSWORD", "guest"),
+        help="RabbitMQ password",
     )
     parser.add_argument(
         "--queue",
@@ -65,7 +90,14 @@ def main() -> None:
 
     for _ in range(args.count):
         meta = random_metadata()
-        publish_message(meta, args.url, args.queue)
+        publish_message(
+            meta,
+            args.host,
+            args.port,
+            args.username,
+            args.password,
+            args.queue,
+        )
         print(json.dumps(json.loads(meta.json()), indent=2))
 
 

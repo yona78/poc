@@ -7,7 +7,10 @@ from pydantic import BaseSettings, validator
 
 
 class ServiceSettings(BaseSettings):
-    broker_url: str
+    broker_host: str
+    broker_port: int
+    broker_user: str
+    broker_password: str
     source_queue: str
     algo_queue: str
     target_video_ids: List[str]

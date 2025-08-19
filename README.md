@@ -19,9 +19,12 @@ The messaging and database layers are accessed through abstract, type-aware inte
 
 Each microservice ships with its own `.env` file inside its service directory:
 
-- `services/ingest_service/.env` – broker, Elasticsearch, MongoDB, and log settings for the ingest service.
+- `services/ingest_service/.env` – broker, Elasticsearch, MongoDB, and log settings for the ingest service. Broker
+  configuration is split into `BROKER_HOST`, `BROKER_PORT`, `BROKER_USER`, and `BROKER_PASSWORD` variables instead of
+  a single connection URL.
 - `services/video_metadata_service/.env` – Elasticsearch, MongoDB, and log settings for the API service.
-- `services/filter_service/.env` – queues, target `video_id` list, and log settings for the filter.
+- `services/filter_service/.env` – queues, target `video_id` list, and log settings for the filter. It uses the same
+  separate RabbitMQ variables (`BROKER_HOST`, `BROKER_PORT`, `BROKER_USER`, `BROKER_PASSWORD`).
 
 Settings are validated with Pydantic so missing values cause an early failure.
 

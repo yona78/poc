@@ -6,7 +6,10 @@ from pydantic import BaseSettings
 
 
 class ServiceSettings(BaseSettings):
-    broker_url: str
+    broker_host: str
+    broker_port: int
+    broker_user: str
+    broker_password: str
     video_metadata_queue: str
     elasticsearch_url: str
     elasticsearch_index: str

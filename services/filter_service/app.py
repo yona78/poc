@@ -35,15 +35,21 @@ def _configure_logger() -> logging.Logger:
 @app.on_event("startup")
 def startup_event() -> None:
     logger = _configure_logger()
+    broker_kwargs = dict(
+        host=settings.broker_host,
+        port=settings.broker_port,
+        username=settings.broker_user,
+        password=settings.broker_password,
+    )
     consumer = create_message_broker(
         VideoMetadataDTO,
-        url=settings.broker_url,
         queue_name=settings.source_queue,
+        **broker_kwargs,
     )
     publisher = create_message_broker(
         VideoMetadataDTO,
-        url=settings.broker_url,
         queue_name=settings.algo_queue,
+        **broker_kwargs,
     )
     resolver = VideoIdResolver(settings.target_video_ids)
 
