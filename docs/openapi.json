@@ -1,0 +1,162 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Video Metadata Service",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/videos": {
+      "post": {
+        "summary": "Create video metadata",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List video metadata",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/videos/{video_id}": {
+      "get": {
+        "summary": "Read video metadata",
+        "parameters": [
+          {"name": "video_id", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+              }
+            }
+          },
+          "404": {"description": "Not Found"}
+        }
+      },
+      "put": {
+        "summary": "Update video metadata",
+        "parameters": [
+          {"name": "video_id", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/VideoMetadataUpdateDTO"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+              }
+            }
+          },
+          "404": {"description": "Not Found"}
+        }
+      },
+      "delete": {
+        "summary": "Delete video metadata",
+        "parameters": [
+          {"name": "video_id", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {"status": {"type": "string"}},
+                  "required": ["status"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionRecognitionResultDTO": {
+        "type": "object",
+        "properties": {
+          "frame_num": {"type": "integer"},
+          "timestamp": {"type": "string"},
+          "action": {"type": "string"},
+          "confidence": {"type": "number"},
+          "clip_length": {"type": "integer"}
+        },
+        "required": ["frame_num", "timestamp", "action", "confidence", "clip_length"]
+      },
+      "AlgorithmResultDTO": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string"},
+          "results": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/ActionRecognitionResultDTO"}
+          }
+        },
+        "required": ["type", "results"]
+      },
+      "VideoMetadataDTO": {
+        "type": "object",
+        "properties": {
+          "video_id": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "algorithms": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/AlgorithmResultDTO"}
+          },
+          "extra": {"type": "object"}
+        },
+        "required": ["video_id", "timestamp", "algorithms", "extra"]
+      },
+      "VideoMetadataUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "timestamp": {"type": "string", "format": "date-time"},
+          "algorithms": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/AlgorithmResultDTO"}
+          },
+          "extra": {"type": "object"}
+        }
+      }
+    }
+  }
+}
