@@ -4,12 +4,9 @@ import logging
 
 from fastapi import FastAPI
 
+from libs.di import create_message_broker, create_storage
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
-from libs.messaging.base import MessageBroker
-from libs.messaging.rabbitmq import RabbitMQBroker
 from libs.models.video_metadata import VideoMetadataDTO
-from libs.storage.base import Storage
-from libs.storage.elasticsearch import ElasticsearchStorage
 from libs.storage.mongo import MongoStorage
 
 from .settings import settings
@@ -32,10 +29,13 @@ logger.addHandler(es_handler)
 
 app = FastAPI(title="Video Metadata Service")
 
-storage_backend: Storage[VideoMetadataDTO] = ElasticsearchStorage(
+storage_backend = create_storage(
     VideoMetadataDTO,
     host=settings.elasticsearch_url,
     index=settings.elasticsearch_index,
+    url=settings.mongodb_url,
+    db=settings.mongodb_db,
+    collection=settings.mongodb_collection,
     id_field="video_id",
 )
 mongo_backend = MongoStorage(
@@ -47,9 +47,9 @@ mongo_backend = MongoStorage(
 service = VideoMetadataService(storage_backend, mongo_backend, logger)
 set_service(service)
 
-message_broker: MessageBroker[VideoMetadataDTO] = RabbitMQBroker(
+message_broker = create_message_broker(
     VideoMetadataDTO,
-    url=settings.rabbitmq_url,
+    url=settings.broker_url,
     queue_name=settings.video_metadata_queue,
 )
 
@@ -57,7 +57,7 @@ message_broker: MessageBroker[VideoMetadataDTO] = RabbitMQBroker(
 @app.on_event("startup")
 def startup_event() -> None:
     logger.info(
-        "Starting message consumption from RabbitMQ queue %s",
+        "Starting message consumption from queue %s",
         settings.video_metadata_queue,
     )
     message_broker.start_consuming(service.create_from_message)

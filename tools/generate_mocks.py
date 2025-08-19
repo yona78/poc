@@ -51,8 +51,16 @@ def publish_message(meta: VideoMetadataDTO, url: str, queue: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Publish random video metadata mocks")
     parser.add_argument("--count", type=int, default=1, help="Number of messages to send")
-    parser.add_argument("--url", default=os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"), help="RabbitMQ connection URL")
-    parser.add_argument("--queue", default=os.getenv("VIDEO_METADATA_QUEUE", "video_metadata"), help="Queue name")
+    parser.add_argument(
+        "--url",
+        default=os.getenv("BROKER_URL", "amqp://guest:guest@localhost:5672/"),
+        help="Message broker connection URL",
+    )
+    parser.add_argument(
+        "--queue",
+        default=os.getenv("VIDEO_METADATA_QUEUE", "video_metadata"),
+        help="Queue name",
+    )
     args = parser.parse_args()
 
     for _ in range(args.count):

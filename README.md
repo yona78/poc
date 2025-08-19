@@ -2,14 +2,14 @@
 
 This repository hosts a Python monorepo intended for multiple microservices. It currently contains:
 
-- **video_metadata_service** – consumes video metadata messages from RabbitMQ, stores them in Elasticsearch, and exposes a read/update/delete HTTP API using FastAPI.
-- **filter_service** – reads messages from a general queue, filters them by `video_id`, and forwards matches to an algorithm-specific queue.
+- **video_metadata_service** – consumes video metadata messages from a message broker, stores them in Elasticsearch, and exposes read-only HTTP endpoints using FastAPI.
+- **filter_service** – reads messages from a general queue, filters them by configurable `video_id` values, and forwards matches to an algorithm-specific queue.
 
 ## Structure
 
 - `libs/` – shared libraries for messaging, storage and data models.
-- `services/video_metadata_service/` – FastAPI application handling RabbitMQ messages and HTTP requests.
-- `services/filter_service/` – RabbitMQ filter that routes messages to algorithm queues.
+- `services/video_metadata_service/` – FastAPI application handling broker messages and HTTP requests.
+- `services/filter_service/` – message filter that routes messages to algorithm queues.
 
 The messaging and storage layers are accessed through abstract, type-aware interfaces. Concrete RabbitMQ, Elasticsearch, and MongoDB implementations operate on generic Pydantic models, making it easy to plug in alternative backends or DTOs.
 
@@ -17,10 +17,15 @@ The messaging and storage layers are accessed through abstract, type-aware inter
 
 Each microservice ships with its own `.env` file inside its service directory:
 
-- `services/video_metadata_service/.env` – RabbitMQ, Elasticsearch, MongoDB, and log settings for the API service.
-- `services/filter_service/.env` – RabbitMQ queues, target `video_id`, and log settings for the filter.
+- `services/video_metadata_service/.env` – broker, Elasticsearch, MongoDB, and log settings for the API service.
+- `services/filter_service/.env` – queues, target `video_id` list, and log settings for the filter.
 
 Settings are validated with Pydantic so missing values cause an early failure.
+
+The concrete message broker and storage backend are selected globally via the
+`MESSAGE_BROKER` and `STORAGE_BACKEND` environment variables. Switching from
+RabbitMQ to another broker or from Elasticsearch to a different database only
+requires changing these variables without modifying service code.
 
 ## Running the service
 
@@ -36,7 +41,7 @@ Settings are validated with Pydantic so missing values cause an early failure.
    uvicorn services.filter_service.app:app --port 8001
    ```
 
-The application will automatically start a background consumer for the `video_metadata` queue and index incoming messages into Elasticsearch. API clients cannot create records directly; new metadata is only persisted when received from RabbitMQ.
+The application will automatically start a background consumer for the `video_metadata` queue and index incoming messages into Elasticsearch. API clients cannot create records directly; new metadata is only persisted when received from the message broker.
 
 ## Development tools
 

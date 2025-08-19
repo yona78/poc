@@ -53,12 +53,6 @@ class MongoStorage(Storage[T], Generic[T]):
     def list(self) -> List[T]:
         return [self._parse(d) for d in self.collection.find()]
 
-    def update(self, obj_id: str, obj: T) -> None:
-        self.collection.update_one({"_id": obj_id}, {"$set": self._to_dict(obj)}, upsert=False)
-
-    def delete(self, obj_id: str) -> None:
-        self.collection.delete_one({"_id": obj_id})
-
     def search(self, query: Dict[str, Any]) -> List[T]:
         return [self._parse(d) for d in self.collection.find(query)]
 

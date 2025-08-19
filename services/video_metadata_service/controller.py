@@ -1,12 +1,11 @@
 import json
-from typing import Dict, List
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
     VideoMetadataDTO,
-    VideoMetadataUpdateDTO,
 )
 
 from .service import VideoMetadataService, get_service
@@ -29,26 +28,6 @@ def list_videos(
     service: VideoMetadataService = Depends(get_service),
 ) -> List[VideoMetadataDTO]:
     return service.list()
-
-
-@router.put("/videos/{video_id}", response_model=VideoMetadataDTO)
-def update_video(
-    video_id: str,
-    updates: VideoMetadataUpdateDTO,
-    service: VideoMetadataService = Depends(get_service),
-) -> VideoMetadataDTO:
-    updated = service.update(video_id, updates)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Video metadata not found")
-    return updated
-
-
-@router.delete("/videos/{video_id}")
-def delete_video(
-    video_id: str, service: VideoMetadataService = Depends(get_service)
-) -> Dict[str, str]:
-    service.delete(video_id)
-    return {"status": "deleted"}
 
 
 @router.get("/videos/search", response_model=List[VideoMetadataDTO])

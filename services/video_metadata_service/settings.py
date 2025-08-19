@@ -6,7 +6,7 @@ from pydantic import AnyUrl, BaseSettings
 
 
 class ServiceSettings(BaseSettings):
-    rabbitmq_url: AnyUrl
+    broker_url: AnyUrl
     video_metadata_queue: str
     elasticsearch_url: AnyUrl
     elasticsearch_index: str

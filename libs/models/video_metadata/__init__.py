@@ -5,7 +5,6 @@ from .dto import (
     AlgorithmResultDTO,
     EnrichedVideoMetadataDTO,
     VideoMetadataDTO,
-    VideoMetadataUpdateDTO,
 )
 from .types import (
     ActionRecognitionResult,
@@ -23,5 +22,4 @@ __all__ = [
     "EnrichedVideoMetadataDTO",
     "VideoMetadata",
     "VideoMetadataDTO",
-    "VideoMetadataUpdateDTO",
 ]

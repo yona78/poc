@@ -21,8 +21,8 @@ class RabbitMQBroker(MessageBroker[T], Generic[T]):
         self, model: Type[T], url: Optional[str] = None, queue_name: Optional[str] = None
     ) -> None:
         self.model = model
-        self.url = url or os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
-        self.queue = queue_name or os.getenv("RABBITMQ_QUEUE", "default_queue")
+        self.url = url or os.getenv("BROKER_URL", "amqp://guest:guest@localhost:5672/")
+        self.queue = queue_name or os.getenv("VIDEO_METADATA_QUEUE", "default_queue")
 
     def start_consuming(self, callback: Callable[[T], None]) -> None:
         """Start a background thread that consumes messages and passes them to *callback*."""

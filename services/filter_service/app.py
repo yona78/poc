@@ -4,10 +4,11 @@ import logging
 
 from fastapi import FastAPI
 
+from libs.di import create_message_broker
 from libs.logging import ElasticsearchLogHandler, JsonFormatter
-from libs.messaging.rabbitmq import RabbitMQBroker
 from libs.models.video_metadata import VideoMetadataDTO
-from libs.resolvers import VideoIdResolver
+
+from .resolver import VideoIdResolver
 
 from .settings import settings
 
@@ -27,18 +28,18 @@ logger.addHandler(es_handler)
 
 app = FastAPI(title="Message Filter Service")
 
-consumer = RabbitMQBroker(
+consumer = create_message_broker(
     VideoMetadataDTO,
-    url=settings.rabbitmq_url,
+    url=settings.broker_url,
     queue_name=settings.source_queue,
 )
-publisher = RabbitMQBroker(
+publisher = create_message_broker(
     VideoMetadataDTO,
-    url=settings.rabbitmq_url,
+    url=settings.broker_url,
     queue_name=settings.algo_queue,
 )
 
-resolver = VideoIdResolver(settings.target_video_id)
+resolver = VideoIdResolver(settings.target_video_ids)
 
 
 def process(message: VideoMetadataDTO) -> None:
@@ -62,7 +63,7 @@ def startup_event() -> None:
         "Consuming from %s and publishing to %s",
         settings.source_queue,
         settings.algo_queue,
-        extra={"labels": {"filter_video_id": settings.target_video_id}},
+        extra={"labels": {"filter_video_ids": settings.target_video_ids}},
     )
     consumer.start_consuming(process)
 

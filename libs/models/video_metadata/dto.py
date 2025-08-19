@@ -89,20 +89,3 @@ class EnrichedVideoMetadataDTO(BaseModel):
 
     class Config:
         extra = "forbid"
-
-
-class VideoMetadataUpdateDTO(BaseModel):
-    timestamp: Optional[datetime] = None
-    algorithms: Optional[List[AlgorithmResultDTO]] = None
-    extra: Optional[Dict[str, Any]] = None
-
-    class Config:
-        extra = "forbid"
-
-    def apply(self, meta: VideoMetadata) -> VideoMetadata:
-        return VideoMetadata(
-            video_id=meta.video_id,
-            timestamp=self.timestamp or meta.timestamp,
-            algorithms=[a.to_domain() for a in self.algorithms] if self.algorithms is not None else meta.algorithms,
-            extra=self.extra or meta.extra,
-        )

@@ -49,15 +49,6 @@ class ElasticsearchStorage(Storage[T], Generic[T]):
         hits = res.get("hits", {}).get("hits", [])
         return [self.model.parse_obj(hit["_source"]) for hit in hits]
 
-    def update(self, obj_id: str, obj: T) -> None:
-        self.client.index(index=self.index, id=obj_id, document=obj.dict())
-
-    def delete(self, obj_id: str) -> None:
-        try:
-            self.client.delete(index=self.index, id=obj_id)
-        except Exception:
-            pass
-
     def search(self, query: Dict[str, Any]) -> List[T]:
         res = self.client.search(index=self.index, body=query)
         hits = res.get("hits", {}).get("hits", [])

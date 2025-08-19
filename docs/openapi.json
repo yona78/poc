@@ -6,27 +6,6 @@
   },
   "paths": {
     "/videos": {
-      "post": {
-        "summary": "Create video metadata",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
-              }
-            }
-          }
-        }
-      },
       "get": {
         "summary": "List video metadata",
         "responses": {
@@ -61,36 +40,13 @@
           },
           "404": {"description": "Not Found"}
         }
-      },
-      "put": {
-        "summary": "Update video metadata",
+      }
+    },
+    "/videos/search": {
+      "get": {
+        "summary": "Search video metadata",
         "parameters": [
-          {"name": "video_id", "in": "path", "required": true, "schema": {"type": "string"}}
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {"$ref": "#/components/schemas/VideoMetadataUpdateDTO"}
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {"$ref": "#/components/schemas/VideoMetadataDTO"}
-              }
-            }
-          },
-          "404": {"description": "Not Found"}
-        }
-      },
-      "delete": {
-        "summary": "Delete video metadata",
-        "parameters": [
-          {"name": "video_id", "in": "path", "required": true, "schema": {"type": "string"}}
+          {"name": "query", "in": "query", "required": true, "schema": {"type": "string"}}
         ],
         "responses": {
           "200": {
@@ -98,9 +54,29 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {"status": {"type": "string"}},
-                  "required": ["status"]
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/VideoMetadataDTO"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/videos/search_with_mongo": {
+      "get": {
+        "summary": "Search and enrich video metadata",
+        "parameters": [
+          {"name": "query", "in": "query", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/EnrichedVideoMetadataDTO"}
                 }
               }
             }
@@ -146,16 +122,13 @@
         },
         "required": ["video_id", "timestamp", "algorithms", "extra"]
       },
-      "VideoMetadataUpdateDTO": {
+      "EnrichedVideoMetadataDTO": {
         "type": "object",
         "properties": {
-          "timestamp": {"type": "string", "format": "date-time"},
-          "algorithms": {
-            "type": "array",
-            "items": {"$ref": "#/components/schemas/AlgorithmResultDTO"}
-          },
-          "extra": {"type": "object"}
-        }
+          "metadata": {"$ref": "#/components/schemas/VideoMetadataDTO"},
+          "mongo": {"type": "object"}
+        },
+        "required": ["metadata"]
       }
     }
   }

@@ -26,16 +26,6 @@ class Storage(ABC, Generic[T]):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, obj_id: str, obj: T) -> None:
-        """Update object identified by *obj_id*."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def delete(self, obj_id: str) -> None:
-        """Delete object identified by *obj_id*."""
-        raise NotImplementedError
-
-    @abstractmethod
     def search(self, query: Dict[str, Any]) -> List[T]:
         """Search for objects matching an Elasticsearch-style *query*."""
         raise NotImplementedError

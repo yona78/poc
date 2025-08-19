@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 from libs.models.video_metadata import (
     EnrichedVideoMetadataDTO,
     VideoMetadataDTO,
-    VideoMetadataUpdateDTO,
 )
 from libs.storage.base import Storage
 
@@ -34,26 +33,6 @@ class VideoMetadataService:
 
     def list(self) -> List[VideoMetadataDTO]:
         return self._storage.list()
-
-    def update(
-        self, video_id: str, updates: VideoMetadataUpdateDTO
-    ) -> Optional[VideoMetadataDTO]:
-        existing = self._storage.get(video_id)
-        if not existing:
-            return None
-        self._logger.info(
-            "Updating video metadata", extra={"labels": {"video_id": video_id}}
-        )
-        updated_domain = updates.apply(existing.to_domain())
-        updated = VideoMetadataDTO.from_domain(updated_domain)
-        self._storage.update(video_id, updated)
-        return updated
-
-    def delete(self, video_id: str) -> None:
-        self._logger.info(
-            "Deleting video metadata", extra={"labels": {"video_id": video_id}}
-        )
-        self._storage.delete(video_id)
 
     def search(self, query: dict) -> List[VideoMetadataDTO]:
         return self._storage.search(query)
