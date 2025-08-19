@@ -1,0 +1,1 @@
+from .video_metadata_service import VideoMetadataService

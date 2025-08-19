@@ -2,13 +2,15 @@
 
 This repository hosts a Python monorepo intended for multiple microservices. It currently contains:
 
-- **video_metadata_service** – consumes video metadata messages from a message broker, stores them in Elasticsearch, and exposes read-only HTTP endpoints using FastAPI.
+- **ingest_service** – consumes video metadata messages from RabbitMQ and persists them to Elasticsearch.
+- **video_metadata_service** – read-only FastAPI API for querying stored metadata and optional MongoDB enrichment.
 - **filter_service** – reads messages from a general queue, filters them by configurable `video_id` values, and forwards matches to an algorithm-specific queue.
 
 ## Structure
 
 - `libs/` – shared libraries for messaging, database access and data models.
-- `services/video_metadata_service/` – FastAPI application handling broker messages and HTTP requests.
+- `services/ingest_service/` – background consumer that stores incoming metadata.
+- `services/video_metadata_service/` – FastAPI application exposing read-only HTTP endpoints.
 - `services/filter_service/` – message filter that routes messages to algorithm queues.
 
 The messaging and database layers are accessed through abstract, type-aware interfaces. Concrete RabbitMQ, Elasticsearch, and MongoDB implementations operate on generic Pydantic models, making it easy to plug in alternative backends or DTOs.
@@ -17,7 +19,8 @@ The messaging and database layers are accessed through abstract, type-aware inte
 
 Each microservice ships with its own `.env` file inside its service directory:
 
-- `services/video_metadata_service/.env` – broker, Elasticsearch, MongoDB, and log settings for the API service.
+- `services/ingest_service/.env` – broker, Elasticsearch, MongoDB, and log settings for the ingest service.
+- `services/video_metadata_service/.env` – Elasticsearch, MongoDB, and log settings for the API service.
 - `services/filter_service/.env` – queues, target `video_id` list, and log settings for the filter.
 
 Settings are validated with Pydantic so missing values cause an early failure.
@@ -35,13 +38,14 @@ requires changing these variables without modifying service code.
    ```
    This installs the project in editable mode so the shared `libs` and service packages are available on the Python path.
 2. Copy the env files above and adjust any values as needed.
-3. Run the services with Uvicorn:
+3. Run the services:
    ```bash
+   python -m services.ingest_service.app
    uvicorn services.video_metadata_service.app:app
    uvicorn services.filter_service.app:app --port 8001
    ```
 
-The application will automatically start a background consumer for the `video_metadata` queue and index incoming messages into Elasticsearch. API clients cannot create records directly; new metadata is only persisted when received from the message broker.
+The ingest service consumes the `video_metadata` queue and indexes incoming messages into Elasticsearch. API clients cannot create records directly; new metadata is only persisted when received from the message broker.
 
 ## Development tools
 

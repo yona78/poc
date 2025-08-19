@@ -1,4 +1,4 @@
-"""Settings for the video metadata service."""
+"""Settings for the ingest service."""
 
 from pathlib import Path
 
@@ -6,6 +6,8 @@ from pydantic import BaseSettings
 
 
 class ServiceSettings(BaseSettings):
+    broker_url: str
+    video_metadata_queue: str
     elasticsearch_url: str
     elasticsearch_index: str
     log_elasticsearch_url: str
@@ -20,4 +22,3 @@ class ServiceSettings(BaseSettings):
 
 
 settings = ServiceSettings()
-

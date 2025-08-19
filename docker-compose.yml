@@ -1,5 +1,15 @@
 version: "3.9"
 services:
+  ingest_service:
+    build:
+      context: .
+      dockerfile: services/ingest_service/Dockerfile
+    env_file: services/ingest_service/.env
+    command: python -m services.ingest_service.app
+    depends_on:
+      - rabbitmq
+      - elasticsearch
+      - mongo
   video_metadata_service:
     build:
       context: .
@@ -9,7 +19,6 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - rabbitmq
       - elasticsearch
       - mongo
   filter_service:
